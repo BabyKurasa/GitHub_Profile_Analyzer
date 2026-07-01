@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Profile Analyzer Pro</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <button id="themeToggle" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle theme">
+        <i id="themeIcon" class="fas fa-sun"></i>
+    </button>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fab fa-github"></i>
+                <span>Profile<span class="highlight">Analyzer</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active" onclick="switchPage('home')">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="#" onclick="switchPage('suggestions')">
+                    <i class="fas fa-lightbulb"></i> Suggestions
+                </a>
+                <a href="#" onclick="switchPage('activity')">
+                    <i class="fas fa-clock"></i> Activity
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero" id="home-page">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-rocket"></i> 
+                GitHub Analytics 2.0
+            </div>
+            <h1>Analyze Any <span class="gradient-text">GitHub Profile</span> Instantly</h1>
+            <p class="hero-subtitle">
+                Get deep insights, language statistics, contribution metrics, and more
+            </p>
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        placeholder="Enter GitHub username..." 
+                        onkeypress="if(event.key==='Enter') analyzeProfile()"
+                    />
+                    <button onclick="analyzeProfile()">
+                        <i class="fas fa-arrow-right"></i> Analyze
+                    </button>
+                </div>
+                <div class="search-hint">
+                    <i class="fas fa-users"></i> 
+                    Try: <span class="hint-tag" onclick="searchUser('octocat')">octocat</span> 
+                    <span class="hint-tag" onclick="searchUser('torvalds')">torvalds</span> 
+                    <span class="hint-tag" onclick="searchUser('gaearon')">gaearon</span>
+                </div>
+            </div>
+        </div>
+        <div class="floating-stats">
+            <div class="stat-card floating-1">
+                <i class="fas fa-code"></i>
+                <span>50M+</span>
+                <label>Repositories</label>
+            </div>
+            <div class="stat-card floating-2">
+                <i class="fas fa-users"></i>
+                <span>100M+</span>
+                <label>Developers</label>
+            </div>
+        </div>
+    </section>
+
+    <section class="results-section" id="result"></section>
+
+    <section class="results-section" id="suggestions-page" style="display: none;">
+        <div id="suggestions-content">
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-search" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                <h3>Search for a profile first</h3>
+                <p style="color: #8b8b9e;">Analyze a GitHub profile to see personalized suggestions</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="results-section" id="activity-page" style="display: none;">
+        <div id="activity-content">
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-search" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                <h3>Search for a profile first</h3>
+                <p style="color: #8b8b9e;">Analyze a GitHub profile to see recent activity</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features-page">
+        <h2>Why <span class="gradient-text">Analyze?</span></h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI-Powered Insights</h3>
+                <p>Get intelligent analysis of coding patterns and expertise</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Language Analytics</h3>
+                <p>Detailed breakdown of programming languages used</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-trophy"></i></div>
+                <h3>Contribution Score</h3>
+                <p>Measure impact through stars, forks, and contributions</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                <h3>Activity Timeline</h3>
+                <p>Visual representation of repository activity over time</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
