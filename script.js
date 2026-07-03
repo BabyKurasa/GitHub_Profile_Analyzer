@@ -1093,16 +1093,294 @@ function getTimeAgo(date) {
 }
 
 function exportProfile(profile) {
-    const dataStr = JSON.stringify(profile, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', `${profile.username}_github_profile.json`);
-    document.body.appendChild(linkElement);
-    linkElement.click();
-    document.body.removeChild(linkElement);
-}
+    // Create a clean HTML version of the profile for PDF
+    const formatNumber = (num) => {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num;
+    };
 
+    const rating = profile.rating;
+    const streakData = profile.streakData || { currentStreak: 0, longestStreak: 0, totalCommits: 0 };
+    
+    // Build HTML content for PDF
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${profile.username} - GitHub Profile Report</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: Arial, sans-serif;
+                    background: #0a0a0f;
+                    color: #e4e4e7;
+                    padding: 40px;
+                    line-height: 1.6;
+                }
+                .container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    background: #1a1a2e;
+                    padding: 40px;
+                    border-radius: 16px;
+                    border: 1px solid #333;
+                }
+                .header {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    border-bottom: 2px solid #667eea;
+                    padding-bottom: 20px;
+                    margin-bottom: 20px;
+                }
+                .avatar {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    border: 3px solid #667eea;
+                }
+                .name {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #fff;
+                }
+                .username {
+                    color: #667eea;
+                    font-size: 16px;
+                }
+                .bio {
+                    color: #8b8b9e;
+                    margin-top: 5px;
+                }
+                .section {
+                    margin: 20px 0;
+                }
+                .section-title {
+                    color: #667eea;
+                    font-size: 18px;
+                    font-weight: bold;
+                    border-bottom: 1px solid #333;
+                    padding-bottom: 10px;
+                    margin-bottom: 15px;
+                }
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 10px;
+                }
+                .stat-item {
+                    background: #0a0a0f;
+                    padding: 12px;
+                    border-radius: 8px;
+                    text-align: center;
+                }
+                .stat-value {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #667eea;
+                }
+                .stat-label {
+                    color: #8b8b9e;
+                    font-size: 11px;
+                    margin-top: 4px;
+                }
+                .score-box {
+                    background: #0a0a0f;
+                    padding: 15px;
+                    border-radius: 8px;
+                    text-align: center;
+                    margin: 15px 0;
+                }
+                .score-number {
+                    font-size: 48px;
+                    font-weight: bold;
+                    color: #667eea;
+                }
+                .score-label {
+                    color: #8b8b9e;
+                    font-size: 14px;
+                }
+                .tier-badge {
+                    display: inline-block;
+                    background: ${rating.tierColor}22;
+                    border: 2px solid ${rating.tierColor};
+                    color: ${rating.tierColor};
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                .breakdown-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 10px;
+                    margin: 10px 0;
+                }
+                .break-item {
+                    background: #0a0a0f;
+                    padding: 8px;
+                    border-radius: 6px;
+                    text-align: center;
+                }
+                .break-value {
+                    font-weight: bold;
+                    color: #fff;
+                }
+                .break-label {
+                    color: #8b8b9e;
+                    font-size: 10px;
+                }
+                .footer {
+                    margin-top: 30px;
+                    padding-top: 20px;
+                    border-top: 1px solid #333;
+                    text-align: center;
+                    color: #5a5a72;
+                    font-size: 12px;
+                }
+                @media print {
+                    body { background: white; padding: 20px; }
+                    .container { background: white; border: 1px solid #ddd; }
+                    .name { color: #000; }
+                    .username { color: #667eea; }
+                    .bio { color: #555; }
+                    .stat-item { background: #f5f5f5; }
+                    .stat-value { color: #667eea; }
+                    .stat-label { color: #666; }
+                    .score-box { background: #f5f5f5; }
+                    .score-number { color: #667eea; }
+                    .break-item { background: #f5f5f5; }
+                    .break-value { color: #000; }
+                    .break-label { color: #666; }
+                    .section-title { color: #667eea; border-bottom: 1px solid #ddd; }
+                    .footer { border-top: 1px solid #ddd; color: #999; }
+                    .tier-badge { background: ${rating.tierColor}22; border: 2px solid ${rating.tierColor}; color: ${rating.tierColor}; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <img src="${profile.avatar_url}" alt="${profile.username}" class="avatar" />
+                    <div>
+                        <div class="name">${profile.name || profile.username}</div>
+                        <div class="username">@${profile.username}</div>
+                        <div class="bio">${profile.bio || ''}</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📊 Developer Score</div>
+                    <div class="score-box">
+                        <div class="score-number">${rating.score}/100</div>
+                        <div class="score-label">
+                            <span class="tier-badge">${rating.badge} ${rating.tier}</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-grid">
+                        ${Object.entries(rating.breakdown || {}).map(([key, value]) => `
+                            <div class="break-item">
+                                <div class="break-value">${value}%</div>
+                                <div class="break-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📈 Statistics</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${formatNumber(profile.followers)}</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.public_repos}</div>
+                            <div class="stat-label">Repositories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.total_stars || 0}</div>
+                            <div class="stat-label">Total Stars</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.total_forks || 0}</div>
+                            <div class="stat-label">Total Forks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.top_language || 'N/A'}</div>
+                            <div class="stat-label">Top Language</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${streakData.currentStreak}</div>
+                            <div class="stat-label">Current Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${streakData.longestStreak}</div>
+                            <div class="stat-label">Longest Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.account_age_days || 0}</div>
+                            <div class="stat-label">Days on GitHub</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🔍 Activity Pattern</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.activityPattern?.peakHour || 'N/A'}</div>
+                            <div class="stat-label">Peak Hour</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.activityPattern?.peakDay || 'N/A'}</div>
+                            <div class="stat-label">Peak Day</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.consistencyScore || 0}%</div>
+                            <div class="stat-label">Consistency</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${profile.openSourceScore || 0}%</div>
+                            <div class="stat-label">Open Source</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    Generated by GitHub Profile Analyzer Pro
+                    <br />${new Date().toLocaleDateString()} • ${new Date().toLocaleTimeString()}
+                    <br />https://babykurasa.github.io/github-profile-analyzer/
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Create a Blob from the HTML
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    // Open in new window for printing/saving as PDF
+    const printWindow = window.open(url, '_blank', 'width=800,height=600');
+    
+    if (printWindow) {
+        printWindow.onload = function() {
+            setTimeout(function() {
+                printWindow.print();
+            }, 500);
+        };
+    } else {
+        alert('Please allow popups to generate the PDF report.');
+    }
+    
+    // Clean up
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 10000);
+}
 function showError(message) {
     const resultDiv = document.getElementById("result");
     resultDiv.innerHTML = `
