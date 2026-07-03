@@ -768,7 +768,7 @@ function displayProfile(profile) {
                         <i class="fab fa-github"></i> View Profile
                     </a>
                     <button onclick='exportProfile(${JSON.stringify(profile).replace(/'/g, "\\'")})' class="profile-link" style="background: #2d3748; border: none; cursor: pointer;">
-                        <i class="fas fa-download"></i> Export JSON
+                        <i class="fas fa-file-pdf"></i> Export PDF
                     </button>
                 </div>
             </div>
@@ -1092,8 +1092,11 @@ function getTimeAgo(date) {
     return 'Just now';
 }
 
+// ============================================
+// EXPORT PDF - Direct Download
+// ============================================
+
 function exportProfile(profile) {
-    // Create a clean HTML version of the profile for PDF
     const formatNumber = (num) => {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -1103,7 +1106,6 @@ function exportProfile(profile) {
     const rating = profile.rating;
     const streakData = profile.streakData || { currentStreak: 0, longestStreak: 0, totalCommits: 0 };
     
-    // Build HTML content for PDF
     const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -1114,18 +1116,18 @@ function exportProfile(profile) {
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body {
                     font-family: Arial, sans-serif;
-                    background: #0a0a0f;
-                    color: #e4e4e7;
+                    background: #ffffff;
+                    color: #1a1a2e;
                     padding: 40px;
                     line-height: 1.6;
                 }
                 .container {
                     max-width: 800px;
                     margin: 0 auto;
-                    background: #1a1a2e;
+                    background: #ffffff;
                     padding: 40px;
                     border-radius: 16px;
-                    border: 1px solid #333;
+                    border: 2px solid #667eea;
                 }
                 .header {
                     display: flex;
@@ -1144,14 +1146,14 @@ function exportProfile(profile) {
                 .name {
                     font-size: 28px;
                     font-weight: bold;
-                    color: #fff;
+                    color: #1a1a2e;
                 }
                 .username {
                     color: #667eea;
                     font-size: 16px;
                 }
                 .bio {
-                    color: #8b8b9e;
+                    color: #555;
                     margin-top: 5px;
                 }
                 .section {
@@ -1161,7 +1163,7 @@ function exportProfile(profile) {
                     color: #667eea;
                     font-size: 18px;
                     font-weight: bold;
-                    border-bottom: 1px solid #333;
+                    border-bottom: 1px solid #ddd;
                     padding-bottom: 10px;
                     margin-bottom: 15px;
                 }
@@ -1171,7 +1173,7 @@ function exportProfile(profile) {
                     gap: 10px;
                 }
                 .stat-item {
-                    background: #0a0a0f;
+                    background: #f5f5f5;
                     padding: 12px;
                     border-radius: 8px;
                     text-align: center;
@@ -1182,12 +1184,12 @@ function exportProfile(profile) {
                     color: #667eea;
                 }
                 .stat-label {
-                    color: #8b8b9e;
+                    color: #666;
                     font-size: 11px;
                     margin-top: 4px;
                 }
                 .score-box {
-                    background: #0a0a0f;
+                    background: #f5f5f5;
                     padding: 15px;
                     border-radius: 8px;
                     text-align: center;
@@ -1199,7 +1201,7 @@ function exportProfile(profile) {
                     color: #667eea;
                 }
                 .score-label {
-                    color: #8b8b9e;
+                    color: #666;
                     font-size: 14px;
                 }
                 .tier-badge {
@@ -1219,44 +1221,30 @@ function exportProfile(profile) {
                     margin: 10px 0;
                 }
                 .break-item {
-                    background: #0a0a0f;
+                    background: #f5f5f5;
                     padding: 8px;
                     border-radius: 6px;
                     text-align: center;
                 }
                 .break-value {
                     font-weight: bold;
-                    color: #fff;
+                    color: #1a1a2e;
                 }
                 .break-label {
-                    color: #8b8b9e;
+                    color: #666;
                     font-size: 10px;
                 }
                 .footer {
                     margin-top: 30px;
                     padding-top: 20px;
-                    border-top: 1px solid #333;
+                    border-top: 1px solid #ddd;
                     text-align: center;
-                    color: #5a5a72;
+                    color: #999;
                     font-size: 12px;
                 }
                 @media print {
                     body { background: white; padding: 20px; }
-                    .container { background: white; border: 1px solid #ddd; }
-                    .name { color: #000; }
-                    .username { color: #667eea; }
-                    .bio { color: #555; }
-                    .stat-item { background: #f5f5f5; }
-                    .stat-value { color: #667eea; }
-                    .stat-label { color: #666; }
-                    .score-box { background: #f5f5f5; }
-                    .score-number { color: #667eea; }
-                    .break-item { background: #f5f5f5; }
-                    .break-value { color: #000; }
-                    .break-label { color: #666; }
-                    .section-title { color: #667eea; border-bottom: 1px solid #ddd; }
-                    .footer { border-top: 1px solid #ddd; color: #999; }
-                    .tier-badge { background: ${rating.tierColor}22; border: 2px solid ${rating.tierColor}; color: ${rating.tierColor}; }
+                    .container { border: 1px solid #667eea; }
                 }
             </style>
         </head>
@@ -1359,28 +1347,22 @@ function exportProfile(profile) {
         </html>
     `;
 
-    // Create a Blob from the HTML
+    // Create download link
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     
-    // Open in new window for printing/saving as PDF
-    const printWindow = window.open(url, '_blank', 'width=800,height=600');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${profile.username}_github_profile.pdf.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     
-    if (printWindow) {
-        printWindow.onload = function() {
-            setTimeout(function() {
-                printWindow.print();
-            }, 500);
-        };
-    } else {
-        alert('Please allow popups to generate the PDF report.');
-    }
-    
-    // Clean up
     setTimeout(() => {
         URL.revokeObjectURL(url);
-    }, 10000);
+    }, 1000);
 }
+
 function showError(message) {
     const resultDiv = document.getElementById("result");
     resultDiv.innerHTML = `
