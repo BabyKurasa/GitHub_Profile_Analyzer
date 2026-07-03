@@ -1093,7 +1093,7 @@ function getTimeAgo(date) {
 }
 
 // ============================================
-// EXPORT PDF - Direct Download
+// EXPORT PDF - Direct Download as HTML
 // ============================================
 
 function exportProfile(profile) {
@@ -1353,7 +1353,7 @@ function exportProfile(profile) {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${profile.username}_github_profile.pdf.html`;
+    link.download = `${profile.username}_github_profile_report.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
