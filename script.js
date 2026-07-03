@@ -768,7 +768,7 @@ function displayProfile(profile) {
                         <i class="fab fa-github"></i> View Profile
                     </a>
                     <button onclick='exportProfile(${JSON.stringify(profile).replace(/'/g, "\\'")})' class="profile-link" style="background: #2d3748; border: none; cursor: pointer;">
-                        <i class="fas fa-file-pdf"></i> Export PDF
+                        <i class="fas fa-download"></i> Export JSON
                     </button>
                 </div>
             </div>
@@ -1092,112 +1092,15 @@ function getTimeAgo(date) {
     return 'Just now';
 }
 
-// ============================================
-// EXPORT PDF - Direct Download as HTML
-// ============================================
-
 function exportProfile(profile) {
-    const formatNumber = (num) => {
-        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-        return num;
-    };
-
-    const rating = profile.rating;
-    const streakData = profile.streakData || { currentStreak: 0, longestStreak: 0, totalCommits: 0 };
-    
-    // Create an isolated container element to render the printable layout
-    const element = document.createElement('div');
-    element.innerHTML = `
-        <div style="font-family: Arial, sans-serif; background: #ffffff; color: #1a1a2e; padding: 30px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-            <div style="display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #667eea; padding-bottom: 20px; margin-bottom: 20px;">
-                <img src="${profile.avatar_url}" alt="${profile.username}" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #667eea;" />
-                <div>
-                    <div style="font-size: 28px; font-weight: bold; color: #1a1a2e;">${profile.name || profile.username}</div>
-                    <div style="color: #667eea; font-size: 16px;">@${profile.username}</div>
-                    <div style="color: #555; margin-top: 5px;">${profile.bio || ''}</div>
-                </div>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="color: #667eea; font-size: 18px; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">?? Developer Score</div>
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0;">
-                    <div style="font-size: 48px; font-weight: bold; color: #667eea;">${rating.score}/100</div>
-                    <div style="color: #666; font-size: 14px; margin-top: 5px;">
-                        <span style="display: inline-block; background: ${rating.tierColor}22; border: 2px solid ${rating.tierColor}; color: ${rating.tierColor}; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 14px;">
-                            ${rating.badge} ${rating.tier}
-                        </span>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;">
-                    ${Object.entries(rating.breakdown || {}).map(([key, value]) => `
-                        <div style="background: #f5f5f5; padding: 8px; border-radius: 6px; text-align: center;">
-                            <div style="font-weight: bold; color: #1a1a2e;">${value}%</div>
-                            <div style="color: #666; font-size: 10px;">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="color: #667eea; font-size: 18px; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">?? Statistics</div>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${formatNumber(profile.followers)}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Followers</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${profile.public_repos}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Repositories</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${profile.total_stars || 0}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Total Stars</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${profile.total_forks || 0}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Total Forks</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${profile.top_language || 'N/A'}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Top Language</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${streakData.currentStreak}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Current Streak</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${streakData.longestStreak}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Longest Streak</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 20px; font-weight: bold; color: #667eea;">${profile.account_age_days || 0}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Days on GitHub</div></div>
-                </div>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="color: #667eea; font-size: 18px; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">?? Activity Pattern</div>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 16px; font-weight: bold; color: #1a1a2e;">${profile.activityPattern?.peakHour || 'N/A'}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Peak Hour</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 16px; font-weight: bold; color: #1a1a2e;">${profile.activityPattern?.peakDay || 'N/A'}</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Peak Day</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 16px; font-weight: bold; color: #1a1a2e;">${profile.consistencyScore || 0}%</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Consistency</div></div>
-                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center;"><div style="font-size: 16px; font-weight: bold; color: #1a1a2e;">${profile.openSourceScore || 0}%</div><div style="color: #666; font-size: 11px; margin-top: 4px;">Open Source</div></div>
-                </div>
-            </div>
-
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #999; font-size: 12px;">
-                Generated by GitHub Profile Analyzer Pro
-                <br />${new Date().toLocaleDateString()} • ${new Date().toLocaleTimeString()}
-            </div>
-        </div>
-    `;
-
-    // Configuration settings for html2pdf
-    const options = {
-        margin:       10,
-        filename:     `${profile.username}_github_profile_report.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true }, // useCORS fixes broken avatar image tokens
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // Run the PDF conversion and initialization
-    html2pdf().set(options).from(element).save();
-}
-
-
-    // Create download link
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${profile.username}_github_profile_report.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 1000);
+    const dataStr = JSON.stringify(profile, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', `${profile.username}_github_profile.json`);
+    document.body.appendChild(linkElement);
+    linkElement.click();
+    document.body.removeChild(linkElement);
 }
 
 function showError(message) {
